@@ -3,171 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Izin Toilet Realtime Multi-PC</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Dashboard Izin Toilet Mandiri</title>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; padding: 20px; margin: 0; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { background: #1e293b; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .title { margin: 0; color: #38bdf8; font-size: 20px; }
+        .jam { font-family: monospace; font-size: 18px; color: #f59e0b; font-weight: bold; }
+        .box-input { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+        .flex-input { display: flex; gap: 10px; margin-top: 8px; }
+        input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 16px; }
+        /* Pastikan tipe button diset agar tidak reload halaman */
+        .btn-ambil { background: #2563eb; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn-ambil:hover { background: #1d4ed8; }
+        .table-section { background: #1e293b; border-radius: 12px; padding: 20px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 10px; }
+        th { padding: 12px; border-bottom: 2px solid #475569; color: #94a3b8; }
+        td { padding: 12px; border-bottom: 1px solid #334155; }
+        .btn-kembali { background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        .btn-kembali:hover { background: #b91c1c; }
+        .empty { text-align: center; color: #64748b; padding: 30px; }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
+<body>
 
-    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 shadow-xl sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="p-2.5 bg-indigo-600/10 rounded-xl border border-indigo-500/30 text-xl">🚽</div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-wide text-indigo-400">Monitoring Izin Toilet</h1>
-                    <p class="text-xs text-slate-400">Multi-PC Local Network Synchronized System</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center space-x-4">
-                <div id="status-koneksi" class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-full text-xs font-medium text-emerald-400">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                    <span>Sistem Sinkronisasi Aktif</span>
-                </div>
-                <div class="bg-slate-950 border border-slate-800 px-4 py-1.5 rounded-xl flex items-center space-x-2">
-                    <span class="text-slate-500 text-sm">⏰</span>
-                    <span id="jam-digital" class="font-mono text-sm tracking-widest text-indigo-400 font-bold">00:00:00</span>
-                </div>
-            </div>
+<div class="container">
+    <div class="header">
+        <div>
+            <h1 class="title">🚽 Monitoring Izin Toilet</h1>
+            <small style="color: #94a3b8;">Sistem Standalone Multi-PC Kantor</small>
         </div>
-    </header>
+        <div id="live-jam" class="jam">00:00:00</div>
+    </div>
 
-    <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
+    <div class="box-input">
+        <label style="font-size: 14px; color: #94a3b8;">Nama Personel / Nomor PC :</label>
+        <div class="flex-input">
+            <input type="text" id="nama-personel" placeholder="Ketik nama Anda di sini..." autocomplete="off">
+            <button type="button" class="btn-ambil" onclick="prosesIzinOut()">🚀 Ambil Izin Keluar</button>
+        </div>
+    </div>
+
+    <div class="table-section">
+        <h3 style="margin-top: 0; color: #e2e8f0;">📋 Daftar Log Aktif</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 50px; text-align: center;">No</th>
+                    <th>Nama Personel</th>
+                    <th>Jam Keluar</th>
+                    <th>Durasi Izin</th>
+                    <th style="width: 100px; text-align: center;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tabel-body">
+                </tbody>
+        </table>
+        <div id="status-kosong" class="empty">☕ Semua personel ada di tempat.</div>
+    </div>
+</div>
+
+<script>
+    // Sinkronisasi lokal antar tab & PC via LocalStorage + Broadcast Channel
+    const sinkronChannel = new BroadcastChannel('office_toilet_channel');
+    let dataLog = JSON.parse(localStorage.getItem('office_toilet_log')) || [];
+
+    // Menjalankan jam digital secara realtime
+    function runningClock() {
+        const waktu = new Date();
+        document.getElementById('live-jam').innerText = waktu.toTimeString().split(' ')[0];
+    }
+    setInterval(runningClock, 1000);
+    runningClock();
+
+    // Fungsi utama menembakkan data ke tabel tanpa reload
+    function prosesIzinOut() {
+        const inputan = document.getElementById('nama-personel');
+        const nama = inputan.value.trim();
         
-        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
-            <label class="block text-sm font-medium text-slate-400 mb-2">Nama Personel / Nomor PC :</label>
-            <div class="flex flex-col sm:flex-row gap-3">
-                <input type="text" id="input-nama" placeholder="Contoh: Budi atau Meja 12..." 
-                       class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition-all">
-                <button onclick="ambilIzin()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-xl shadow-lg flex items-center justify-center space-x-2 transition-all cursor-pointer">
-                    <span>🚀</span>
-                    <span>Ambil Izin Keluar</span>
-                </button>
-            </div>
-        </section>
-
-        <section class="bg-slate-900 border border-slate-800 rounded-2xl shadow-lg overflow-hidden">
-            <div class="px-5 py-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-                <div class="flex items-center space-x-2">
-                    <span class="text-lg">📋</span>
-                    <h2 class="font-semibold text-slate-200">Daftar Log Aktif</h2>
-                </div>
-                <span id="badge-count" class="bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold px-2.5 py-1 rounded-full">0 Sedang Izin</span>
-            </div>
-
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider bg-slate-950/40">
-                            <th class="p-4 w-16 text-center">No</th>
-                            <th class="p-4">Nama / Keterangan</th>
-                            <th class="p-4">Jam Keluar</th>
-                            <th class="p-4">Durasi Istirahat</th>
-                            <th class="p-4 text-center">Aksi Tindakan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabel-log" class="divide-y divide-slate-800/60 text-sm"></tbody>
-                </table>
-            </div>
-            
-            <div id="empty-state" class="p-12 text-center text-slate-500 space-y-2">
-                <div class="text-3xl">☕</div>
-                <p>Semua personel ada di tempat. Tidak ada log aktif saat ini.</p>
-            </div>
-        </section>
-    </main>
-
-    <script>
-        // Menggunakan BroadcastChannel bawaan browser (100% aman dari blokir internet)
-        const channel = new BroadcastChannel('toilet_sync_channel');
-        let daftarIzin = JSON.parse(localStorage.getItem('daftarIzin')) || [];
-
-        function jalankanJam() {
-            const sekarang = new Date();
-            document.getElementById('jam-digital').innerText = sekarang.toTimeString().split(' ')[0];
-        }
-        setInterval(jalankanJam, 1000);
-        jalankanJam();
-
-        function simpanDanBroadcast() {
-            localStorage.setItem('daftarIzin', JSON.stringify(daftarIzin));
-            renderTabel();
-            channel.postMessage({ tipe: 'UPDATE_DATA', data: daftarIzin });
+        if (nama === "") {
+            alert("Harap isi nama terlebih dahulu!");
+            return;
         }
 
-        function ambilIzin() {
-            const input = document.getElementById('input-nama');
-            const nama = input.value.trim();
-            if (!nama) return alert("Masukkan nama terlebih dahulu!");
-
-            const sekarang = new Date();
-            const baru = {
-                id: 'id_' + sekarang.getTime(),
-                nama: nama,
-                jamKeluar: sekarang.toTimeString().split(' ')[0].substring(0, 5),
-                timestamp: sekarang.getTime()
-            };
-
-            daftarIzin.push(baru);
-            input.value = "";
-            simpanDanBroadcast();
-        }
-
-        function kembaliKeTempat(id) {
-            daftarIzin = daftarIzin.filter(item => item.id !== id);
-            simpanDanBroadcast();
-        }
-
-        channel.onmessage = (event) => {
-            if (event.data.tipe === 'UPDATE_DATA') {
-                daftarIzin = event.data.data;
-                localStorage.setItem('daftarIzin', JSON.stringify(daftarIzin));
-                renderTabel();
-            }
+        const skrg = new Date();
+        const dataBaru = {
+            id: 'log_' + skrg.getTime(),
+            nama: nama,
+            jam: skrg.toTimeString().split(' ')[0].substring(0, 5),
+            start: skrg.getTime()
         };
 
-        function renderTabel() {
-            const tbody = document.getElementById('tabel-log');
-            const emptyState = document.getElementById('empty-state');
-            const badgeCount = document.getElementById('badge-count');
-            
-            tbody.innerHTML = "";
-            badgeCount.innerText = `${daftarIzin.length} Sedang Izin`;
+        dataLog.push(dataBaru);
+        inputan.value = ""; // Mengosongkan kolom input
+        
+        simpanDanSegarkan();
+    }
 
-            if (daftarIzin.length === 0) {
-                emptyState.classList.remove('hidden');
-                return;
-            }
-            emptyState.classList.add('hidden');
+    function hapusIzin(id) {
+        dataLog = dataLog.filter(item => item.id !== id);
+        simpanDanKirim();
+    }
 
-            daftarIzin.forEach((item, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="p-4 text-center text-slate-500 font-mono">${index + 1}</td>
-                    <td class="p-4 font-semibold text-slate-200">👤 ${item.nama}</td>
-                    <td class="p-4 font-mono text-slate-400">${item.jamKeluar}</td>
-                    <td class="p-4 font-mono text-amber-400" id="timer-${item.id}">00m 00s</td>
-                    <td class="p-4 text-center">
-                        <button onclick="kembaliKeTempat('${item.id}')" class="bg-emerald-600/10 hover:bg-emerald-600 border border-emerald-500/30 text-emerald-400 hover:text-white text-xs px-3 py-1.5 rounded-lg transition-all cursor-pointer">✔ Kembali</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+    function simpanDanKirim() {
+        localStorage.setItem('office_toilet_log', JSON.stringify(dataLog));
+        segarkanTabel();
+        sinkronChannel.postMessage({ tipe: 'REFRESH_DATA', data: dataLog });
+    }
+
+    // Alur penanganan sinkronisasi antar PC browser
+    sinkronChannel.onmessage = (event) => {
+        if (event.data.tipe === 'REFRESH_DATA') {
+            dataLog = event.data.data;
+            localStorage.setItem('office_toilet_log', JSON.stringify(dataLog));
+            segarkanTabel();
         }
+    };
 
-        setInterval(() => {
-            const sekarang = new Date().getTime();
-            daftarIzin.forEach(item => {
-                const el = document.getElementById(`timer-${item.id}`);
-                if (el) {
-                    const selisih = Math.floor((sekarang - item.timestamp) / 1000);
-                    const m = String(Math.floor(selisih / 60)).padStart(2, '0');
-                    const s = String(selisih % 60).padStart(2, '0');
-                    el.innerText = `${m}m ${s}s`;
-                }
-            });
-        }, 1000);
+    function segarkanTabel() {
+        const tbody = document.getElementById('tabel-body');
+        const kosongBox = document.getElementById('status-kosong');
+        
+        tbody.innerHTML = "";
 
-        renderTabel();
-    </script>
+        if (dataLog.length === 0) {
+            kosongBox.style.display = "block";
+            return;
+        }
+        kosongBox.style.display = "none";
+
+        dataLog.forEach((item, index) => {
+            const baris = document.createElement('tr');
+            baris.innerHTML = `
+                <td style="text-align: center; color: #94a3b8;">${index + 1}</td>
+                <td style="font-weight: bold;">👤 ${item.nama}</td>
+                <td>${item.jam}</td>
+                <td style="color: #f59e0b; font-weight: bold;" id="timer-${item.id}">00m 00s</td>
+                <td style="text-align: center;"><button class="btn-kembali" onclick="hapusIzin('${item.id}')">✔ Kembali</button></td>
+            `;
+            tbody.appendChild(baris);
+        });
+    }
+
+    // Timer counter detik berjalan
+    setInterval(() => {
+        const kini = new Date().getTime();
+        dataLog.forEach(item => {
+            const elementTimer = document.getElementById(`timer-${item.id}`);
+            if (elementTimer) {
+                const selisihDetik = Math.floor((kini - item.start) / 1000);
+                const menit = String(Math.floor(selisihDetik / 60)).padStart(2, '0');
+                const detik = String(selisihDetik % 60).padStart(2, '0');
+                elementTimer.innerText = `${menit}m ${detik}s`;
+            }
+        });
+    }, 1000);
+
+    // Deteksi jika komputer sebelah melakukan update data
+    window.addEventListener('storage', () => {
+        dataLog = JSON.parse(localStorage.getItem('office_toilet_log')) || [];
+        segarkanTabel();
+    });
+
+    // Jalankan render awal saat website dibuka
+    segarkanTabel();
+</script>
+
 </body>
 </html>
