@@ -13,7 +13,6 @@
         .box-input { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
         .flex-input { display: flex; gap: 10px; margin-top: 8px; }
         input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 16px; }
-        /* Pastikan tipe button diset agar tidak reload halaman */
         .btn-ambil { background: #2563eb; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
         .btn-ambil:hover { background: #1d4ed8; }
         .table-section { background: #1e293b; border-radius: 12px; padding: 20px; }
@@ -28,6 +27,7 @@
 <body>
 
 <div class="container">
+    <!-- HEADER -->
     <div class="header">
         <div>
             <h1 class="title">🚽 Monitoring Izin Toilet</h1>
@@ -36,6 +36,7 @@
         <div id="live-jam" class="jam">00:00:00</div>
     </div>
 
+    <!-- INPUT PANEL -->
     <div class="box-input">
         <label style="font-size: 14px; color: #94a3b8;">Nama Personel / Nomor PC :</label>
         <div class="flex-input">
@@ -44,6 +45,7 @@
         </div>
     </div>
 
+    <!-- TABEL LOG -->
     <div class="table-section">
         <h3 style="margin-top: 0; color: #e2e8f0;">📋 Daftar Log Aktif</h3>
         <table>
@@ -56,19 +58,17 @@
                     <th style="width: 100px; text-align: center;">Aksi</th>
                 </tr>
             </thead>
-            <tbody id="tabel-body">
-                </tbody>
+            <tbody id="tabel-body"></tbody>
         </table>
         <div id="status-kosong" class="empty">☕ Semua personel ada di tempat.</div>
     </div>
 </div>
 
 <script>
-    // Sinkronisasi lokal antar tab & PC via LocalStorage + Broadcast Channel
     const sinkronChannel = new BroadcastChannel('office_toilet_channel');
     let dataLog = JSON.parse(localStorage.getItem('office_toilet_log')) || [];
 
-    // Menjalankan jam digital secara realtime
+    // Jam digital realtime
     function runningClock() {
         const waktu = new Date();
         document.getElementById('live-jam').innerText = waktu.toTimeString().split(' ')[0];
@@ -76,7 +76,7 @@
     setInterval(runningClock, 1000);
     runningClock();
 
-    // Fungsi utama menembakkan data ke tabel tanpa reload
+    // Fungsi proses input data (Sudah Diperbaiki)
     function prosesIzinOut() {
         const inputan = document.getElementById('nama-personel');
         const nama = inputan.value.trim();
@@ -95,9 +95,9 @@
         };
 
         dataLog.push(dataBaru);
-        inputan.value = ""; // Mengosongkan kolom input
+        inputan.value = ""; 
         
-        simpanDanSegarkan();
+        simpanDanKirim(); // <--- SEKARANG SUDAH BENAR
     }
 
     function hapusIzin(id) {
@@ -111,7 +111,6 @@
         sinkronChannel.postMessage({ tipe: 'REFRESH_DATA', data: dataLog });
     }
 
-    // Alur penanganan sinkronisasi antar PC browser
     sinkronChannel.onmessage = (event) => {
         if (event.data.tipe === 'REFRESH_DATA') {
             dataLog = event.data.data;
@@ -145,7 +144,6 @@
         });
     }
 
-    // Timer counter detik berjalan
     setInterval(() => {
         const kini = new Date().getTime();
         dataLog.forEach(item => {
@@ -159,13 +157,11 @@
         });
     }, 1000);
 
-    // Deteksi jika komputer sebelah melakukan update data
     window.addEventListener('storage', () => {
         dataLog = JSON.parse(localStorage.getItem('office_toilet_log')) || [];
         segarkanTabel();
     });
 
-    // Jalankan render awal saat website dibuka
     segarkanTabel();
 </script>
 
