@@ -3,166 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Izin Toilet Mandiri</title>
+    <title>Monitoring Toilet Kantor</title>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; padding: 20px; margin: 0; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header { background: #1e293b; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .title { margin: 0; color: #38bdf8; font-size: 20px; }
-        .jam { font-family: monospace; font-size: 18px; color: #f59e0b; font-weight: bold; }
-        .box-input { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; }
-        .flex-input { display: flex; gap: 10px; margin-top: 8px; }
-        input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 16px; }
-        .btn-ambil { background: #2563eb; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        .btn-ambil:hover { background: #1d4ed8; }
-        .table-section { background: #1e293b; border-radius: 12px; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 10px; }
-        th { padding: 12px; border-bottom: 2px solid #475569; color: #94a3b8; }
-        td { padding: 12px; border-bottom: 1px solid #334155; }
-        .btn-kembali { background: #dc2626; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; padding: 20px; }
+        .wrapper { max-width: 700px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 15px; margin-bottom: 20px; }
+        .jam-digital { font-family: monospace; font-size: 20px; color: #f59e0b; font-weight: bold; }
+        .input-box { display: flex; gap: 10px; margin-bottom: 25px; }
+        input { flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 16px; }
+        button { background: #2563eb; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; }
+        button:hover { background: #1d4ed8; }
+        table { wIdth: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+        th { color: #94a3b8; font-size: 13px; text-transform: uppercase; }
+        .btn-kembali { background: #dc2626; padding: 6px 12px; font-size: 13px; }
         .btn-kembali:hover { background: #b91c1c; }
-        .empty { text-align: center; color: #64748b; padding: 30px; }
+        .empty-text { text-align: center; color: #64748b; padding: 30px; font-style: Italic; }
+        .btn-reset { background: #475569; font-size: 12px; padding: 5px 10px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- HEADER -->
+<div class="wrapper">
     <div class="header">
         <div>
-            <h1 class="title">🚽 Monitoring Izin Toilet</h1>
-            <small style="color: #94a3b8;">Sistem Standalone Multi-PC Kantor</small>
+            <h2 style="margin:0; color:#38bdf8;">🚽 Sistem Izin Toilet</h2>
+            <small style="color: #94a3b8;">Local Multi-PC System</small>
         </div>
-        <div id="live-jam" class="jam">00:00:00</div>
+        <div id="jam" class="jam-digital">00:00:00</div>
     </div>
 
-    <!-- INPUT PANEL -->
-    <div class="box-input">
-        <label style="font-size: 14px; color: #94a3b8;">Nama Personel / Nomor PC :</label>
-        <div class="flex-input">
-            <input type="text" id="nama-personel" placeholder="Ketik nama Anda di sini..." autocomplete="off">
-            <button type="button" class="btn-ambil" onclick="prosesIzinOut()">🚀 Ambil Izin Keluar</button>
-        </div>
+    <div class="input-box">
+        <input type="text" id="nama" placeholder="Ketik nama Anda di sini..." autocomplete="off">
+        <button type="button" onclick="tambahLog()">🚀 Ambil Izin Keluar</button>
     </div>
 
-    <!-- TABEL LOG -->
-    <div class="table-section">
-        <h3 style="margin-top: 0; color: #e2e8f0;">📋 Daftar Log Aktif</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 50px; text-align: center;">No</th>
-                    <th>Nama Personel</th>
-                    <th>Jam Keluar</th>
-                    <th>Durasi Izin</th>
-                    <th style="width: 100px; text-align: center;">Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="tabel-body"></tbody>
-        </table>
-        <div id="status-kosong" class="empty">☕ Semua personel ada di tempat.</div>
-    </div>
+    <h3 style="margin: 0 0 10px 0; color: #e2e8f0;">📋 Daftar Aktif</h3>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 40px;">No</th>
+                <th>Nama</th>
+                <th>Jam</th>
+                <th>Durasi</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody id="tabel-isi"></tbody>
+    </table>
+    
+    <div id="kosong" class="empty-text">Semua personel ada di tempat.</div>
+
+    <center>
+        <button type="button" class="btn-reset" onclick="bersihkanSistem()">🔄 Reset Paksa Sistem (Klik jika macet)</button>
+    </center>
 </div>
 
 <script>
-    const sinkronChannel = new BroadcastChannel('office_toilet_channel');
-    let dataLog = JSON.parse(localStorage.getItem('office_toilet_log')) || [];
+    const bc = new BroadcastChannel('toilet_final_channel');
+    let logs = JSON.parse(localStorage.getItem('toilet_final_logs')) || [];
 
-    // Jam digital realtime
-    function runningClock() {
-        const waktu = new Date();
-        document.getElementById('live-jam').innerText = waktu.toTimeString().split(' ')[0];
+    // Jam Realtime
+    function clock() {
+        document.getElementById('jam').innerText = new Date().toTimeString().split(' ')[0];
     }
-    setInterval(runningClock, 1000);
-    runningClock();
+    setInterval(clock, 1000);
+    clock();
 
-    // Fungsi proses input data (Sudah Diperbaiki)
-    function prosesIzinOut() {
-        const inputan = document.getElementById('nama-personel');
-        const nama = inputan.value.trim();
-        
-        if (nama === "") {
-            alert("Harap isi nama terlebih dahulu!");
+    // Tambah Data
+    function tambahLog() {
+        const txtNama = document.getElementById('nama');
+        const valNama = txtNama.value.trim();
+
+        if (!valNama) {
+            alert("Nama tidak boleh kosong!");
             return;
         }
 
-        const skrg = new Date();
-        const dataBaru = {
-            id: 'log_' + skrg.getTime(),
-            nama: nama,
-            jam: skrg.toTimeString().split(' ')[0].substring(0, 5),
-            start: skrg.getTime()
+        const waktuSekarang = new Date();
+        const data = {
+            id: 'id_' + waktuSekarang.getTime(),
+            nama: valNama,
+            jamKeluar: waktuSekarang.toTimeString().split(' ')[0].substring(0, 5),
+            time: waktuSekarang.getTime()
         };
 
-        dataLog.push(dataBaru);
-        inputan.value = ""; 
-        
-        simpanDanKirim(); // <--- SEKARANG SUDAH BENAR
+        logs.push(data);
+        txtNama.value = "";
+        simpanData();
     }
 
-    function hapusIzin(id) {
-        dataLog = dataLog.filter(item => item.id !== id);
-        simpanDanKirim();
+    // Hapus Data
+    function hapusLog(id) {
+        logs = logs.filter(item => item.id !== id);
+        simpanData();
     }
 
-    function simpanDanKirim() {
-        localStorage.setItem('office_toilet_log', JSON.stringify(dataLog));
-        segarkanTabel();
-        sinkronChannel.postMessage({ tipe: 'REFRESH_DATA', data: dataLog });
+    // Simpan & Kirim Antar Tab / PC
+    function simpanData() {
+        localStorage.setItem('toilet_final_logs', JSON.stringify(logs));
+        render();
+        bc.postMessage({ tipe: 'UPDATE', data: logs });
     }
 
-    sinkronChannel.onmessage = (event) => {
-        if (event.data.tipe === 'REFRESH_DATA') {
-            dataLog = event.data.data;
-            localStorage.setItem('office_toilet_log', JSON.stringify(dataLog));
-            segarkanTabel();
+    // Terima data dari PC/Tab Sebelah
+    bc.onmessage = (e) => {
+        if (e.data.tipe === 'UPDATE') {
+            logs = e.data.data;
+            localStorage.setItem('toilet_final_logs', JSON.stringify(logs));
+            render();
         }
     };
 
-    function segarkanTabel() {
-        const tbody = document.getElementById('tabel-body');
-        const kosongBox = document.getElementById('status-kosong');
-        
+    // Tampilkan ke Tabel
+    function render() {
+        const tbody = document.getElementById('tabel-isi');
+        const kosong = document.getElementById('kosong');
         tbody.innerHTML = "";
 
-        if (dataLog.length === 0) {
-            kosongBox.style.display = "block";
+        if (logs.length === 0) {
+            kosong.style.display = "block";
             return;
         }
-        kosongBox.style.display = "none";
+        kosong.style.display = "none";
 
-        dataLog.forEach((item, index) => {
-            const baris = document.createElement('tr');
-            baris.innerHTML = `
-                <td style="text-align: center; color: #94a3b8;">${index + 1}</td>
-                <td style="font-weight: bold;">👤 ${item.nama}</td>
-                <td>${item.jam}</td>
-                <td style="color: #f59e0b; font-weight: bold;" id="timer-${item.id}">00m 00s</td>
-                <td style="text-align: center;"><button class="btn-kembali" onclick="hapusIzin('${item.id}')">✔ Kembali</button></td>
+        logs.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="color:#64748b;">${index + 1}</td>
+                <td style="font-weight:bold;">👤 ${item.nama}</td>
+                <td>${item.jamKeluar}</td>
+                <td style="color:#fbbf24; font-weight:bold;" id="t-${item.id}">00m 00s</td>
+                <td><button class="btn-kembali" onclick="hapusLog('${item.id}')">✔ Kembali</button></td>
             `;
-            tbody.appendChild(baris);
+            tbody.appendChild(tr);
         });
     }
 
+    // Hitung Menit & Detik Berjalan
     setInterval(() => {
-        const kini = new Date().getTime();
-        dataLog.forEach(item => {
-            const elementTimer = document.getElementById(`timer-${item.id}`);
-            if (elementTimer) {
-                const selisihDetik = Math.floor((kini - item.start) / 1000);
-                const menit = String(Math.floor(selisihDetik / 60)).padStart(2, '0');
-                const detik = String(selisihDetik % 60).padStart(2, '0');
-                elementTimer.innerText = `${menit}m ${detik}s`;
+        const skrg = new Date().getTime();
+        logs.forEach(item => {
+            const el = document.getElementById(`t-${item.id}`);
+            if (el) {
+                const diff = Math.floor((skrg - item.time) / 1000);
+                const m = String(Math.floor(diff / 60)).padStart(2, '0');
+                const s = String(diff % 60).padStart(2, '0');
+                el.innerText = `${m}m ${s}s`;
             }
         });
     }, 1000);
 
+    // Fungsi Reset Jika Browser Mengunci Error Lama
+    function bersihkanSistem() {
+        localStorage.clear();
+        logs = [];
+        simpanData();
+        alert("Sistem berhasil direset bersih!");
+        location.reload();
+    }
+
     window.addEventListener('storage', () => {
-        dataLog = JSON.parse(localStorage.getItem('office_toilet_log')) || [];
-        segarkanTabel();
+        logs = JSON.parse(localStorage.getItem('toilet_final_logs')) || [];
+        render();
     });
 
-    segarkanTabel();
+    render();
 </script>
 
 </body>
