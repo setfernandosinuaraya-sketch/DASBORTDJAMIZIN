@@ -118,12 +118,10 @@
             const menit = String(sekarang.getMinutes()).padStart(2, '0');
             const detik = String(sekarang.getSeconds()).padStart(2, '0');
             document.getElementById('jam-digital').innerText = `${jam}:${menit}:${detik}`;
-        }
-        setInterval(jalankanJam, 1000);
-        jalankanJam();
-
-        // 3. AMBIL IZIN KELUAR (PUSH DATA KE FIREBASE)
-        function ambilIzin() {
+        // 1. KONFIGURASI VERSI TERBUKA DAN MULTI-CLIENT
+const firebaseConfig = {
+    databaseURL: "https://monitoring-toilet-public-rtdb.firebaseio.com/"
+};
             const inputElement = document.getElementById('input-nama');
             const nama = inputElement.value.trim();
             
