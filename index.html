@@ -3,172 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoring Toilet Kantor</title>
+    <title>Parser Mutasi KlikBCA Premium</title>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: sans-serif; padding: 20px; }
-        .wrapper { max-width: 700px; margin: 0 auto; background: #1e293b; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 15px; margin-bottom: 20px; }
-        .jam-digital { font-family: monospace; font-size: 20px; color: #f59e0b; font-weight: bold; }
-        .input-box { display: flex; gap: 10px; margin-bottom: 25px; }
-        input { flex: 1; padding: 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; font-size: 16px; }
-        button { background: #2563eb; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; }
-        button:hover { background: #1d4ed8; }
-        table { wIdth: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
-        th { color: #94a3b8; font-size: 13px; text-transform: uppercase; }
-        .btn-kembali { background: #dc2626; padding: 6px 12px; font-size: 13px; }
-        .btn-kembali:hover { background: #b91c1c; }
-        .empty-text { text-align: center; color: #64748b; padding: 30px; font-style: Italic; }
-        .btn-reset { background: #475569; font-size: 12px; padding: 5px 10px; margin-top: 20px; }
+        body {
+            /* Background pola batik/ukiran geometris otomatis (Base64) */
+            background-color: #dfdbe5;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M12 24c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm24 0c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zM24 12c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4zm0 24c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4z' fill='%239C92AC' fill-opacity='0.25' fill-rule='evenodd'/%3E%3C/svg%3E");
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border: 1px solid #c2b2ca;
+        }
+        h2 {
+            color: #4a3b52;
+            margin-top: 0;
+            text-align: center;
+            border-bottom: 2px solid #e1dbe6;
+            padding-bottom: 10px;
+        }
+        p {
+            color: #5c4d66;
+            font-weight: 500;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border: 2px solid #c2b2ca;
+            border-radius: 6px;
+            box-sizing: border-box;
+            resize: vertical;
+            font-family: monospace;
+            background-color: #fafafa;
+            font-size: 14px;
+        }
+        .btn-group {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .btn-paste { background-color: #2e7d32; }
+        .btn-paste:hover { background-color: #1b5e20; }
+        .btn-process { background-color: #1565c0; }
+        .btn-process:hover { background-color: #0d47a1; }
+        .btn-copy { background-color: #ef6c00; }
+        .btn-copy:hover { background-color: #e65100; }
+        .btn-clear { background-color: #c62828; }
+        .btn-clear:hover { background-color: #b71c1c; }
+        
+        .result-box {
+            background: #f5f2f7;
+            border: 2px dashed #b6a7be;
+            padding: 15px;
+            border-radius: 6px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 250px;
+            overflow-y: auto;
+            color: #2b1f33;
+            font-weight: bold;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
 
-<div class="wrapper">
-    <div class="header">
-        <div>
-            <h2 style="margin:0; color:#38bdf8;">🚽 Sistem Izin Toilet</h2>
-            <small style="color: #94a3b8;">Local Multi-PC System</small>
-        </div>
-        <div id="jam" class="jam-digital">00:00:00</div>
-    </div>
-
-    <div class="input-box">
-        <input type="text" id="nama" placeholder="Ketik nama Anda di sini..." autocomplete="off">
-        <button type="button" onclick="tambahLog()">🚀 Ambil Izin Keluar</button>
-    </div>
-
-    <h3 style="margin: 0 0 10px 0; color: #e2e8f0;">📋 Daftar Aktif</h3>
-    <table>
-        <thead>
-            <tr>
-                <th style="width: 40px;">No</th>
-                <th>Nama</th>
-                <th>Jam</th>
-                <th>Durasi</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody id="tabel-isi"></tbody>
-    </table>
+<div class="container">
+    <h2>📋 Parser Mutasi KlikBCA</h2>
+    <p>Tempel teks mutasi di bawah ini:</p>
     
-    <div id="kosong" class="empty-text">Semua personel ada di tempat.</div>
+    <textarea id="inputMutasi" placeholder="Silakan klik di sini lalu tekan Ctrl+V (atau Cmd+V) untuk menempel mutasi..."></textarea>
+    
+    <div class="btn-group">
+        <button class="btn-paste" onclick="pasteFromClipboard()">📋 Paste Otomatis</button>
+        <button class="btn-process" onclick="prosesMutasi()">⚙️ Proses Mutasi</button>
+        <button class="btn-copy" onclick="copyResult()">📄 Copy Hasil</button>
+        <button class="btn-clear" onclick="clearAll()">❌ Clear</button>
+    </div>
 
-    <center>
-        <button type="button" class="btn-reset" onclick="bersihkanSistem()">🔄 Reset Paksa Sistem (Klik jika macet)</button>
-    </center>
+    <p>Hasil Pemisahan:</p>
+    <div id="outputHasil" class="result-box">Hasil akan muncul di sini...</div>
 </div>
 
 <script>
-    const bc = new BroadcastChannel('toilet_final_channel');
-    let logs = JSON.parse(localStorage.getItem('toilet_final_logs')) || [];
-
-    // Jam Realtime
-    function clock() {
-        document.getElementById('jam').innerText = new Date().toTimeString().split(' ')[0];
+    // Fungsi Paste otomatis
+    async function pasteFromClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            document.getElementById('inputMutasi').value = text;
+        } catch (err) {
+            alert('Akses diblokir browser online!\n\nSolusinya mudah:\n1. Klik kotak input di atas.\n2. Tekan tombol Ctrl + V di keyboard kamu.');
+        }
     }
-    setInterval(clock, 1000);
-    clock();
 
-    // Tambah Data
-    function tambahLog() {
-        const txtNama = document.getElementById('nama');
-        const valNama = txtNama.value.trim();
-
-        if (!valNama) {
-            alert("Nama tidak boleh kosong!");
+    // Fungsi memproses mutasi bertumpuk/berantakan seperti di screenshot kamu
+    function prosesMutasi() {
+        const input = document.getElementById('inputMutasi').value;
+        if (!input.trim()) {
+            alert('Kotak input masih kosong!');
             return;
         }
 
-        const waktuSekarang = new Date();
-        const data = {
-            id: 'id_' + waktuSekarang.getTime(),
-            nama: valNama,
-            jamKeluar: waktuSekarang.toTimeString().split(' ')[0].substring(0, 5),
-            time: waktuSekarang.getTime()
-        };
-
-        logs.push(data);
-        txtNama.value = "";
-        simpanData();
-    }
-
-    // Hapus Data
-    function hapusLog(id) {
-        logs = logs.filter(item => item.id !== id);
-        simpanData();
-    }
-
-    // Simpan & Kirim Antar Tab / PC
-    function simpanData() {
-        localStorage.setItem('toilet_final_logs', JSON.stringify(logs));
-        render();
-        bc.postMessage({ tipe: 'UPDATE', data: logs });
-    }
-
-    // Terima data dari PC/Tab Sebelah
-    bc.onmessage = (e) => {
-        if (e.data.tipe === 'UPDATE') {
-            logs = e.data.data;
-            localStorage.setItem('toilet_final_logs', JSON.stringify(logs));
-            render();
-        }
-    };
-
-    // Tampilkan ke Tabel
-    function render() {
-        const tbody = document.getElementById('tabel-isi');
-        const kosong = document.getElementById('kosong');
-        tbody.innerHTML = "";
-
-        if (logs.length === 0) {
-            kosong.style.display = "block";
-            return;
-        }
-        kosong.style.display = "none";
-
-        logs.forEach((item, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td style="color:#64748b;">${index + 1}</td>
-                <td style="font-weight:bold;">👤 ${item.nama}</td>
-                <td>${item.jamKeluar}</td>
-                <td style="color:#fbbf24; font-weight:bold;" id="t-${item.id}">00m 00s</td>
-                <td><button class="btn-kembali" onclick="hapusLog('${item.id}')">✔ Kembali</button></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    // Hitung Menit & Detik Berjalan
-    setInterval(() => {
-        const skrg = new Date().getTime();
-        logs.forEach(item => {
-            const el = document.getElementById(`t-${item.id}`);
-            if (el) {
-                const diff = Math.floor((skrg - item.time) / 1000);
-                const m = String(Math.floor(diff / 60)).padStart(2, '0');
-                const s = String(diff % 60).padStart(2, '0');
-                el.innerText = `${m}m ${s}s`;
+        // Pecah per baris dan bersihkan spasi kosong
+        let lines = input.split('\n').map(line => line.trim()).filter(line => line !== "");
+        let hasilTeks = "";
+        
+        // Loop mencari indikator CR atau DB
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i] === 'CR' || lines[i] === 'DB') {
+                let jenis = lines[i];
+                let nominal = "0";
+                let nama = "Tidak diketahui";
+                
+                // Berdasarkan screenshot user, nominal ada tepat 1 baris di ATAS 'CR'/'DB'
+                if (i >= 1) {
+                    nominal = lines[i-1];
+                }
+                
+                // Nama/Keterangan biasanya ada di beberapa baris sebelumnya lagi.
+                // Kita cari baris teks terdekat di atas nominal yang bukan angka murni.
+                if (i >= 2) {
+                    let indexNama = i - 2;
+                    // Jika baris di atas nominal ternyata angka '0000' atau tanggal, kita naik satu baris lagi
+                    if ((lines[indexNama] === '0000' || /^\d+$/.test(lines[indexNama])) && indexNama >= 1) {
+                        indexNama--;
+                    }
+                    nama = lines[indexNama];
+                }
+                
+                let status = (jenis === 'CR') ? '[TOP UP / MASUK]' : '[TRANSFER / KELUAR]';
+                hasilTeks += `${status} Ket: ${nama} | Nominal: Rp ${nominal}\n`;
             }
-        });
-    }, 1000);
+        }
 
-    // Fungsi Reset Jika Browser Mengunci Error Lama
-    function bersihkanSistem() {
-        localStorage.clear();
-        logs = [];
-        simpanData();
-        alert("Sistem berhasil direset bersih!");
-        location.reload();
+        const outputDiv = document.getElementById('outputHasil');
+        if (hasilTeks === "") {
+            outputDiv.innerText = "Sistem gagal memisahkan secara otomatis. Pastikan teks mutasi disalin utuh bersama tulisan CR atau DB-nya.";
+        } else {
+            outputDiv.innerText = hasilTeks.trim();
+        }
     }
 
-    window.addEventListener('storage', () => {
-        logs = JSON.parse(localStorage.getItem('toilet_final_logs')) || [];
-        render();
-    });
+    // Fungsi Copy hasil
+    function copyResult() {
+        const resultText = document.getElementById('outputHasil').innerText;
+        if (resultText === "Hasil akan muncul di sini..." || resultText === "") {
+            alert('Tidak ada teks untuk di-copy.');
+            return;
+        }
 
-    render();
+        navigator.clipboard.writeText(resultText).then(() => {
+            alert('Hasil rapi berhasil disalin!');
+        }).catch(err => {
+            alert('Gagal menyalin otomatis, silakan blok teks hasil lalu copy manual.');
+        });
+    }
+
+    // Fungsi Reset
+    function clearAll() {
+        document.getElementById('inputMutasi').value = "";
+        document.getElementById('outputHasil').innerText = "Hasil akan muncul di sini...";
+    }
 </script>
 
 </body>
